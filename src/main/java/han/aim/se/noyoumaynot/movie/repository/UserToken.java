@@ -10,7 +10,19 @@ public class UserToken {
 
     public UserToken(String username){
         this.username = username;
-        this.expiresIn = TOKENVALIDTIME;
+        this.expiresIn = System.currentTimeMillis() / 1000 + TOKENVALIDTIME;
         this.token = UUID.randomUUID().toString();
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public long getExpiresIn() {
+        return expiresIn;
+    }
+
+    public String getUsername() {
+        return username;
     }
 }
