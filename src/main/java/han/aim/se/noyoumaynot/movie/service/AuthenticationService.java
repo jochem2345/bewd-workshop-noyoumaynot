@@ -52,4 +52,17 @@ public class AuthenticationService {
     }
     return null;
   }
+
+  public Role getRole(String token) {
+    for (UserToken userToken : userTokens) {
+      if (userToken.getToken().equals(token)) {
+        for (User user : users) {
+          if (user.getUsername().equals(userToken.getUsername())) {
+            return user.getRole();
+          }
+        }
+      }
+    }
+    return null;
+  }
 }

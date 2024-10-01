@@ -4,6 +4,7 @@ import han.aim.se.noyoumaynot.movie.domain.Movie;
 import han.aim.se.noyoumaynot.movie.service.AuthenticationService;
 import han.aim.se.noyoumaynot.movie.service.MovieService;
 import han.aim.se.noyoumaynot.movie.exceptionhandling.AuthenticationException;
+import han.aim.se.noyoumaynot.movie.user.Role;
 import han.aim.se.noyoumaynot.movie.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -18,10 +19,6 @@ import java.util.ArrayList;
 public class MovieController {
     private final MovieService movieService;
     private final AuthenticationService authenticationService;
-//    private static final String USERNAME = "jochem";
-//    private static final String PASSWORD = "123";
-
-    public String currentToken;
 
     @Autowired
     public MovieController(MovieService movieService, AuthenticationService authenticationService) {
@@ -31,11 +28,11 @@ public class MovieController {
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody User user) {
-        currentToken = authenticationService.login(user.getUsername(), user.getPassword());
-        if (currentToken == null) {
+        String token = authenticationService.login(user.getUsername(), user.getPassword());
+        if (token == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
-        return ResponseEntity.ok("Login successful, token: " + currentToken);
+        return ResponseEntity.ok("Login successful, token: " + token);
     }
 
     @GetMapping
@@ -54,21 +51,27 @@ public class MovieController {
 
     @PostMapping("/add")
     public Movie addMovie(@RequestBody Movie movie, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
-        authenticate(authorization);
+        Role role = authenticate(authorization);
+        if (!role.isAdmin()) {
+            throw new AuthenticationException("You do not have permission to add movie");
+        }
         movieService.insertMovie(movie);
         return movie;
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteMovie(@PathVariable("id") String id, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
-        authenticate(authorization);
+        Role role = authenticate(authorization);
+        if (!role.isAdmin()) {
+            throw new AuthenticationException("You do not have permission to delete movie");
+        }
         movieService.deleteMovie(id);
         return ResponseEntity.ok().build();
     }
 
-    private String authenticate(String token) throws AuthenticationException {
+    private Role authenticate(String token) throws AuthenticationException {
         if (authenticationService.isValidToken(token)){
-            return authenticationService.getUsername(token);
+            return authenticationService.getRole(token);
         } else {
             throw new AuthenticationException("Invalid token");
         }

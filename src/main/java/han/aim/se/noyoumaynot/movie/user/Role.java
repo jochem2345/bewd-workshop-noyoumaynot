@@ -1,20 +1,20 @@
 package han.aim.se.noyoumaynot.movie.user;
 
 public class Role {
-    public String rolename;
+    public String name;
     public boolean admin;
 
-    public Role(String rolename, boolean admin) {
-        this.rolename = rolename;
+    public Role(String name, boolean admin) {
+        this.name = name;
         this.admin = admin;
     }
 
-    public String getRolename() {
-        return rolename;
+    public String getname() {
+        return name;
     }
 
-    public void setRolename(String rolename) {
-        this.rolename = rolename;
+    public void setname(String name) {
+        this.name = name;
     }
 
     public boolean isAdmin() {
